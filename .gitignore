@@ -1,3 +1,5 @@
 *.tfstate*
 ssh/doris-services-keys
 .terraform
+terraform/.env
+secrets.tgz
