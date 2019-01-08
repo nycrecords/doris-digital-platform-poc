@@ -45,7 +45,9 @@ Secrets should not be committed and can by tansfered to new machines by first pa
 ## Make sure keypair is set up correctly
 
 `cd terraform`
+
 `dotenv terraform init`
+
 `dotenv terraform apply -target=aws_key_pair.doris-services-keys`
 
 ## Change configs as desired in packer/config.json
