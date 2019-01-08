@@ -84,11 +84,15 @@ resource "aws_security_group" "allow_all" {
 
 resource "aws_key_pair" "doris-services-keys" {
   key_name   = "doris-services-keys"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCzWJ2JxLo0xyC5+KCIE9vslBmmpKmqexQhuIgMNQdvycH2cUAdlRksXcgXRzGJNMjGdJkZiXs56HFa5ZbCTnPcbD8bmcB3mY7hX5BQRTyoQwniMItRjHTPXcwep6LsuepK1xSXKIXHnwy3wLcRP/N0LbwTHrlgY5nv8YxOHrGLK7oHj7MAkLZCSjt7njBa6J8jYOg2/cx2lvc30aBFM3aIaDEpif3+/rIGAfXJP+ThWj7SKgLgmTS6mAztCyn/6gmFjptN4Uegk6CyCK906qSkfdKr4DQPafkjSeM9MMECL4T5xSdAYb7snaNABKvn4iSmV1xPuuJi4Bhqwal7j5Sx doris-services-key"
+  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDsDr5ftf168jwO99GYCL1+d/XtiV1hFkv+AIGKYIPF77V4kZSfj1bErU3khTUhQiRpvHc0I6S2tg4o54V/tUMbrGPEAfg+8n9KZARwTW50dRaO4DHAL0x4iwm60jyD03pg1CwRiNHDtAkX5WiqN6i7uVtfrTQ0T3QEqB9Dzh2IxeHW83V3KTWMQpW+EgtRK588hhCvSSF/VmT6sWgYaMJeVjfeidcsue3UYnWs0MJvPhqYMFSHCM5NsXbnPWsR2JqQYPP1P9r5+uI257evmKQWeExEWjlG+Vlz7DyXqjn+V0VShbhTjcggpidJnwCs6M/Xlutr/Ru263h/oqX7Esl9"
 }
 
 resource "aws_s3_bucket" "doris-services-assets" {
   bucket = "doris-services-assets"
+  acl    = "public-read"
+}
+resource "aws_s3_bucket" "doris-services-uploads" {
+  bucket = "doris-services-uploads"
   acl    = "public-read"
 }
 
@@ -137,21 +141,21 @@ data "aws_ami" "hyku" {
 
   owners = ["self"]
 }
-# data "aws_ami" "archivematica" {
-#   most_recent = true
+data "aws_ami" "archivematica" {
+  most_recent = true
 
-#   filter {
-#     name   = "name"
-#     values = ["doris-hyku-archivematica-centos*"]
-#   }
+  filter {
+    name   = "name"
+    values = ["doris-hyku-archivematica-centos*"]
+  }
 
-#   filter {
-#     name   = "virtualization-type"
-#     values = ["hvm"]
-#   }
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
 
-#   owners = ["self"]
-# }
+  owners = ["self"]
+}
 # data "aws_ami" "base" {
 #   most_recent = true
 #   filter {
@@ -200,22 +204,22 @@ resource "aws_instance" "hyku" {
   }
 }
 
-# resource "aws_instance" "archivematica" {
-#   ami = "${data.aws_ami.archivematica.id}"
-#   instance_type = "m5.large"
-#   #disable_api_termination = true
-#   key_name = "doris-services-keys"
-#   vpc_security_group_ids = ["${aws_security_group.allow_all.id}"]
-#   subnet_id = "${aws_subnet.doris_services_subnet.id}"
-#   associate_public_ip_address = true
-#   root_block_device = {
-#     volume_size = "1000" # 1TB
-#   }
-#   tags {
-#     Name = "archivematica-1"
-#     Type = "archivematica"
-#   }
-# }
+resource "aws_instance" "archivematica" {
+  ami = "${data.aws_ami.archivematica.id}"
+  instance_type = "m5.large"
+  #disable_api_termination = true
+  key_name = "doris-services-keys"
+  vpc_security_group_ids = ["${aws_security_group.allow_all.id}"]
+  subnet_id = "${aws_subnet.doris_services_subnet.id}"
+  associate_public_ip_address = true
+  root_block_device = {
+    volume_size = "1000" # 1TB
+  }
+  tags {
+    Name = "archivematica-1"
+    Type = "archivematica"
+  }
+}
 
 
 # resource "aws_lb_target_group_attachment" "frontent_http" {
@@ -225,25 +229,25 @@ resource "aws_instance" "hyku" {
 # }
 
 resource "aws_route53_record" "doris-db" {
-  zone_id = "Z1RXNGAAOJQGI4"
-  name    = "doris-db.notch8.com"
+  zone_id = "Z37PTQKK7X14DM"
+  name    = "services-db.getinfo.nyc"
   type    = "A"
   ttl     = "300"
   records = ["${aws_instance.storage.public_ip}"]
 }
 
 resource "aws_route53_record" "doris-hyku" {
-  zone_id = "Z1RXNGAAOJQGI4"
-  name    = "doris-hyku.notch8.com"
+  zone_id = "Z37PTQKK7X14DM"
+  name    = "hyku.getinfo.nyc"
   type    = "A"
   ttl     = "300"
   records = ["${aws_instance.hyku.public_ip}"]
 }
 
-# resource "aws_route53_record" "doris-archivematica" {
-#   zone_id = "Z1RXNGAAOJQGI4"
-#   name    = "doris-archivematica.notch8.com"
-#   type    = "A"
-#   ttl     = "300"
-#   records = ["${aws_instance.archivematica.public_ip}"]
-# }
+resource "aws_route53_record" "doris-archivematica" {
+  zone_id = "Z37PTQKK7X14DM"
+  name    = "archivematica.getinfo.nyc"
+  type    = "A"
+  ttl     = "300"
+  records = ["${aws_instance.archivematica.public_ip}"]
+}
