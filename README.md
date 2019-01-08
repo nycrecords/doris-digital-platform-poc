@@ -62,14 +62,14 @@ dotenv terraform apply -target=aws_key_pair.doris-services-keys
 ## Change configs as desired in packer/config.json
 
 ## Create the base AMI
-./build.sh base ami
+`./build.sh base ami`
 
 ## Create the Storage AMI (Fedora/Solr/Mysql/Redis)
-./build.sh storage ami
+`./build.sh storage ami`
 
 ## Create the Hyku AMI
-./build.sh hyku ami
+`./build.sh hyku ami`
 
 ## Create the Archivematica AMI
-./build.sh archivematica ami
+`./build.sh archivematica ami`
 
