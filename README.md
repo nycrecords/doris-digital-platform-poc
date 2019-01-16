@@ -5,6 +5,13 @@
 `brew install packer terraform`
 `gem install dotenv` 
 
+## Check out the code from Git
+
+`git clone https://gitlab.com/notch8/doris.git`
+
+## Init the submodules
+`cd doris && git submodules init && git submodules update`
+
 ## Pack secrets on working machine
 
 Secrets should not be committed and can by tansfered to new machines by first packing them as a tarzip and then copying them. The list of files needed and editable is maintained in bin/pack-secrets script. They should only be transfered securly.
@@ -22,6 +29,7 @@ Secrets should not be committed and can by tansfered to new machines by first pa
 `cd hyku && cap production deploy`
 
 # View Hyku app config
+
 `cd hyku && cap production config:show`
 
 # Change Hyku app config

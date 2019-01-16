@@ -47,8 +47,37 @@ resource "aws_security_group" "allow_all" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
+    self        = true
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+   ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 8000
+    to_port     = 8000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -233,8 +262,17 @@ resource "aws_route53_record" "doris-db" {
   name    = "services-db.getinfo.nyc"
   type    = "A"
   ttl     = "300"
+  records = ["${aws_instance.storage.private_ip}"]
+}
+
+resource "aws_route53_record" "doris-db-ext" {
+  zone_id = "Z37PTQKK7X14DM"
+  name    = "services-db-ext.getinfo.nyc"
+  type    = "A"
+  ttl     = "300"
   records = ["${aws_instance.storage.public_ip}"]
 }
+
 
 resource "aws_route53_record" "doris-hyku" {
   zone_id = "Z37PTQKK7X14DM"
