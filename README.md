@@ -98,6 +98,34 @@ Backups are encrypted and stored in S3. To restore backups, first download the c
 ## Create the Archivematica AMI
 `./build.sh archivematica ami`
 
+# Services
+
+All services are run via systemctl. They can be started, stopped, restarted, etc with commands like `sudo systemctl start httpd`
+
+On the Hyku host the following are available:
+
+`systemctl status httpd` # Apache and Passenger
+`systemctl status sidekiq` # Sidekiq background job runner
+
+It is sometimes useful to restart just Passenger w/o restarting Apache. This is done as follows
+`passenger-config restart-app /opt/doris-hyku/current`
+
+On the Archivematica host:
+
+`systemctl status node1_elasticsearch` # Search services
+`systemctl status archivematica-dashboard` # Dashboard microservice
+`systemctl status nginx` # Web proxy
+`systemctl status archivematica-mcp-client` # MCP microservice
+
+Storage host:
+
+`systemctl status mysql` # Database service (serves Fedora, Archivematica and Hyku)
+`systemctl status solr` # Solr search service
+`systemctl status redis` # Key / Value store (used by Hyku for background job queuing)
+`systemctl status fedora` # Fedora service
+
+All systems have `ossec` (intrusion and system health) and `clamav` running as services as well.
+
 # Importing in Hyku
 
 Hyku currently supports a command line importer, though a visual method allowing librarians better access is planned. On the commandline, from the hyku root directory (currently `/opt/doris-hyku/current`) the command for CSV import is `RAILS_ENV=production ./bin/import_from_csv VISIBILITY PATH_TO_CSV ATH_TO_FILES`.  An example of this for the initial import is `RAILS_ENV=production ./bin/import_from_csv public /opt/import.csv /opt/stora^C/DPC\ Public\ Charities`.
