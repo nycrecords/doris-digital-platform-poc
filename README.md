@@ -105,23 +105,31 @@ All services are run via systemctl. They can be started, stopped, restarted, etc
 On the Hyku host the following are available:
 
 `systemctl status httpd` # Apache and Passenger
+
 `systemctl status sidekiq` # Sidekiq background job runner
 
 It is sometimes useful to restart just Passenger w/o restarting Apache. This is done as follows
+
 `passenger-config restart-app /opt/doris-hyku/current`
 
 On the Archivematica host:
 
 `systemctl status node1_elasticsearch` # Search services
+
 `systemctl status archivematica-dashboard` # Dashboard microservice
+
 `systemctl status nginx` # Web proxy
+
 `systemctl status archivematica-mcp-client` # MCP microservice
 
 Storage host:
 
 `systemctl status mysql` # Database service (serves Fedora, Archivematica and Hyku)
+
 `systemctl status solr` # Solr search service
+
 `systemctl status redis` # Key / Value store (used by Hyku for background job queuing)
+
 `systemctl status fedora` # Fedora service
 
 All systems have `ossec` (intrusion and system health) and `clamav` running as services as well.
