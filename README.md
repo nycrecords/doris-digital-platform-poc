@@ -3,7 +3,7 @@
 # Initial Setup
 ## Install Dependencies
 `brew install packer terraform`
-`gem install dotenv` 
+`gem install dotenv`
 
 ## Check out the code from Git
 
@@ -14,7 +14,7 @@
 
 ## Pack secrets on working machine
 
-Secrets should not be committed and can by tansfered to new machines by first packing them as a tarzip and then copying them. The list of files needed and editable is maintained in bin/pack-secrets script. They should only be transfered securly.
+Secrets should not be committed and can by transferred to new machines by first packing them as a tarzip and then copying them. The list of files needed and editable is maintained in bin/pack-secrets script. They should only be transferred securely.
 
 `./bin/pack-secrets`
 
@@ -51,12 +51,12 @@ Secrets should not be committed and can by tansfered to new machines by first pa
 # Backups
 ## Backup Tools
 
-We use the [backup gem](http://backup.github.io/backup/v4/) to perform our backups. It has a lot of build in tools for dealing with most of the stack and runs very dependably. An email is sent at the end of each daily backup. This is set as a cron job on the Hyku server and on the Archivematica Server.
+We use the [backup gem](http://backup.github.io/backup/v4/) to perform our backups. It has a lot of built in tools for dealing with most of the stack and runs very dependably. An email is sent at the end of each daily backup. This is set as a cron job on the Hyku server and on the Archivematica Server.
 
 ## What is Backed Up
 ### Hyku
 
-For Hyku we backup the database that Hyku uses directly (to store users and session info), along with the database that Fedora uses. We back up all config files and derivatives (to speed restoration). Code is already in Github and thus does not need seperate backup. The Redis queue and Solr indexes are not backed up currently as they can be regenerated, but this might be something to consider expanding when moving out of POC.
+For Hyku we backup the database that Hyku uses directly (to store users and session info), along with the database that Fedora uses. We back up all config files and derivatives (to speed restoration). Code is already in Github and thus does not need separate backup. The Redis queue and Solr indexes are not backed up currently as they can be regenerated, but this might be something to consider expanding when moving out of POC.
 
 ### Archivematica
 
@@ -64,11 +64,11 @@ Archivematcia is backed up by running a backup script on the Archivematica serve
 
 ### S3 Files
 
-Currently S3 files are not backed up outside of the Amazon bucket configuration. This means they are protected from faults such as machine failure or even data center failure, but are not protected from user issues (such as mass delete) or a complete partner outage (aka all of AWS going down or loosing data).
+Currently S3 files are not backed up outside of the Amazon bucket configuration. This means they are protected from faults such as machine failure or even data center failure, but are not protected from user issues (such as mass delete) or a complete partner outage (aka all of AWS going down or losing data).
 
 ## Backup Schedule
 
-Currently backups are taking nightly. This can be scaled up or down easily by editing the cron jobs on the servers.
+Currently backups are taken nightly. This can be scaled up or down easily by editing the cron jobs on the servers.
 
 # Restore Procedure
 
