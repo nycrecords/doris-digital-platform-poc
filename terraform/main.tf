@@ -1,17 +1,31 @@
+# ---------------------------------------------------------------------------------------------------------------------
+# Deploy an instance of the DORIS Digital Platform in AWS.
+# For more information: https://github.com/nycrecords/thelma
+# ---------------------------------------------------------------------------------------------------------------------
+
+# Configure Terraform Provider
 provider "aws" {
-  region = "us-east-1"
+  region = "${var.aws_region}"
+}
+
+# Configure Terraform Remote State 
+terraform {
+  backend "atlas" {
+    name = "NYCRecords/digital-platform-dev-joel"
+  }
 }
 
 resource "aws_vpc" "doris_services" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block           = "${var.cidr_range}"
   enable_dns_hostnames = true
+
   tags {
-    Name = "doris-services-vpc"
+    Name = "${var.prefix}-vpc"
   }
 }
 
 resource "aws_internet_gateway" "doris_services_gateway" {
-    vpc_id = "${aws_vpc.doris_services.id}"
+  vpc_id = "${aws_vpc.doris_services.id}"
 }
 
 resource "aws_subnet" "doris_services_subnet" {
@@ -21,21 +35,21 @@ resource "aws_subnet" "doris_services_subnet" {
 }
 
 resource "aws_route_table" "doris_services_route_table" {
-    vpc_id = "${aws_vpc.doris_services.id}"
+  vpc_id = "${aws_vpc.doris_services.id}"
 
-    route {
-        cidr_block = "0.0.0.0/0"
-        gateway_id = "${aws_internet_gateway.doris_services_gateway.id}"
-    }
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = "${aws_internet_gateway.doris_services_gateway.id}"
+  }
 
-    tags {
-        Name = "Public Subnet"
-    }
+  tags {
+    Name = "Public Subnet"
+  }
 }
 
 resource "aws_route_table_association" "doris_service_route_association" {
-    subnet_id = "${aws_subnet.doris_services_subnet.id}"
-    route_table_id = "${aws_route_table.doris_services_route_table.id}"
+  subnet_id      = "${aws_subnet.doris_services_subnet.id}"
+  route_table_id = "${aws_route_table.doris_services_route_table.id}"
 }
 
 resource "aws_security_group" "allow_all" {
@@ -44,10 +58,10 @@ resource "aws_security_group" "allow_all" {
   vpc_id      = "${aws_vpc.doris_services.id}"
 
   ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    self        = true
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
+    self      = true
   }
 
   ingress {
@@ -64,7 +78,7 @@ resource "aws_security_group" "allow_all" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-   ingress {
+  ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
@@ -111,17 +125,18 @@ resource "aws_security_group" "allow_all" {
 #         }
 # }
 
-resource "aws_key_pair" "doris-services-keys" {
-  key_name   = "doris-services-keys"
+resource "aws_key_pair" "${var.prefix}-keys" {
+  key_name   = "${var.prefix}-keys"
   public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDsDr5ftf168jwO99GYCL1+d/XtiV1hFkv+AIGKYIPF77V4kZSfj1bErU3khTUhQiRpvHc0I6S2tg4o54V/tUMbrGPEAfg+8n9KZARwTW50dRaO4DHAL0x4iwm60jyD03pg1CwRiNHDtAkX5WiqN6i7uVtfrTQ0T3QEqB9Dzh2IxeHW83V3KTWMQpW+EgtRK588hhCvSSF/VmT6sWgYaMJeVjfeidcsue3UYnWs0MJvPhqYMFSHCM5NsXbnPWsR2JqQYPP1P9r5+uI257evmKQWeExEWjlG+Vlz7DyXqjn+V0VShbhTjcggpidJnwCs6M/Xlutr/Ru263h/oqX7Esl9"
 }
 
-resource "aws_s3_bucket" "doris-services-assets" {
-  bucket = "doris-services-assets"
+resource "aws_s3_bucket" "${var.prefix}-assets" {
+  bucket = "${var.prefix}-assets"
   acl    = "public-read"
 }
-resource "aws_s3_bucket" "doris-services-uploads" {
-  bucket = "doris-services-uploads"
+
+resource "aws_s3_bucket" "${var.prefix}-uploads" {
+  bucket = "${var.prefix}-uploads"
   acl    = "public-read"
 }
 
@@ -130,7 +145,7 @@ data "aws_ami" "base" {
 
   filter {
     name   = "name"
-    values = ["doris-hyku-base-centos*"]
+    values = ["${var.prefix}-base-centos*"]
   }
 
   filter {
@@ -140,12 +155,13 @@ data "aws_ami" "base" {
 
   owners = ["self"]
 }
+
 data "aws_ami" "storage" {
   most_recent = true
 
   filter {
     name   = "name"
-    values = ["doris-hyku-storage-centos*"]
+    values = ["${var.prefix}-storage-centos*"]
   }
 
   filter {
@@ -155,12 +171,13 @@ data "aws_ami" "storage" {
 
   owners = ["self"]
 }
+
 data "aws_ami" "hyku" {
   most_recent = true
 
   filter {
     name   = "name"
-    values = ["doris-hyku-hyku-centos*"]
+    values = ["${var.prefix}-hyku-centos*"]
   }
 
   filter {
@@ -170,12 +187,13 @@ data "aws_ami" "hyku" {
 
   owners = ["self"]
 }
+
 data "aws_ami" "archivematica" {
   most_recent = true
 
   filter {
     name   = "name"
-    values = ["doris-hyku-archivematica-centos*"]
+    values = ["${var.prefix}-archivematica-centos*"]
   }
 
   filter {
@@ -185,6 +203,7 @@ data "aws_ami" "archivematica" {
 
   owners = ["self"]
 }
+
 # data "aws_ami" "base" {
 #   most_recent = true
 #   filter {
@@ -200,16 +219,19 @@ data "aws_ami" "archivematica" {
 # } 
 
 resource "aws_instance" "storage" {
-  ami = "${data.aws_ami.storage.id}"
+  ami           = "${data.aws_ami.storage.id}"
   instance_type = "m5.xlarge"
+
   #disable_api_termination = true
-  key_name = "doris-services-keys"
-  vpc_security_group_ids = ["${aws_security_group.allow_all.id}"]
-  subnet_id = "${aws_subnet.doris_services_subnet.id}"
+  key_name                    = "${var.prefix}-keys"
+  vpc_security_group_ids      = ["${aws_security_group.allow_all.id}"]
+  subnet_id                   = "${aws_subnet.doris_services_subnet.id}"
   associate_public_ip_address = true
+
   root_block_device = {
     volume_size = "1000" # 1TB
   }
+
   tags {
     Name = "storage-1"
     Type = "storage"
@@ -217,16 +239,19 @@ resource "aws_instance" "storage" {
 }
 
 resource "aws_instance" "hyku" {
-  ami = "${data.aws_ami.hyku.id}"
+  ami           = "${data.aws_ami.hyku.id}"
   instance_type = "m5.large"
+
   #disable_api_termination = true
-  key_name = "doris-services-keys"
-  vpc_security_group_ids = ["${aws_security_group.allow_all.id}"]
-  subnet_id = "${aws_subnet.doris_services_subnet.id}"
+  key_name                    = "${var.prefix}-keys"
+  vpc_security_group_ids      = ["${aws_security_group.allow_all.id}"]
+  subnet_id                   = "${aws_subnet.doris_services_subnet.id}"
   associate_public_ip_address = true
+
   root_block_device = {
     volume_size = "500" # 10TB
   }
+
   tags {
     Name = "hyku-1"
     Type = "hyku"
@@ -234,22 +259,24 @@ resource "aws_instance" "hyku" {
 }
 
 resource "aws_instance" "archivematica" {
-  ami = "${data.aws_ami.archivematica.id}"
+  ami           = "${data.aws_ami.archivematica.id}"
   instance_type = "m5.large"
+
   #disable_api_termination = true
-  key_name = "doris-services-keys"
-  vpc_security_group_ids = ["${aws_security_group.allow_all.id}"]
-  subnet_id = "${aws_subnet.doris_services_subnet.id}"
+  key_name                    = "${var.prefix}-keys"
+  vpc_security_group_ids      = ["${aws_security_group.allow_all.id}"]
+  subnet_id                   = "${aws_subnet.doris_services_subnet.id}"
   associate_public_ip_address = true
+
   root_block_device = {
     volume_size = "1000" # 1TB
   }
+
   tags {
     Name = "archivematica-1"
     Type = "archivematica"
   }
 }
-
 
 # resource "aws_lb_target_group_attachment" "frontent_http" {
 #   target_group_arn = "${aws_lb_target_group.alb_front_http.arn}"
@@ -272,7 +299,6 @@ resource "aws_route53_record" "doris-db-ext" {
   ttl     = "300"
   records = ["${aws_instance.storage.public_ip}"]
 }
-
 
 resource "aws_route53_record" "doris-hyku" {
   zone_id = "Z37PTQKK7X14DM"
