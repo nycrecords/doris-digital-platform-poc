@@ -1,21 +1,28 @@
-# ---------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------
 # Deploy an instance of the DORIS Digital Platform in AWS.
 # For more information: https://github.com/nycrecords/thelma
-# ---------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------
 
 # Configure Terraform Provider
 provider "aws" {
-  region = "${var.aws_region}"
+  region     = "${var.aws_region}"
+  access_key = "${var.aws_access_key}"
+  secret_key = "${var.aws_secret_key}"
 }
 
 # Configure Terraform Remote State 
 terraform {
-  backend "atlas" {
-    name = "NYCRecords/digital-platform-dev-joel"
+  backend "remote" {
+    hostname     = "${var.remote_state_hostname}"
+    organization = "${var.remote_state_organization}"
+
+    workspaces {
+      name = "${var.remote_state_workspace_name}"
+    }
   }
 }
 
-resource "aws_vpc" "doris_services" {
+resource "aws_vpc" "thelma-dev-joel" {
   cidr_block           = "${var.cidr_range}"
   enable_dns_hostnames = true
 
@@ -24,22 +31,22 @@ resource "aws_vpc" "doris_services" {
   }
 }
 
-resource "aws_internet_gateway" "doris_services_gateway" {
-  vpc_id = "${aws_vpc.doris_services.id}"
+resource "aws_internet_gateway" "thelma-dev-joel-gateway" {
+  vpc_id = "${aws_vpc.thelma-dev-joel.id}"
 }
 
-resource "aws_subnet" "doris_services_subnet" {
-  vpc_id            = "${aws_vpc.doris_services.id}"
+resource "aws_subnet" "thelma-dev-joel-subnet" {
+  vpc_id            = "${aws_vpc.thelma-dev-joel.id}"
   availability_zone = "us-east-1b"
-  cidr_block        = "${cidrsubnet(aws_vpc.doris_services.cidr_block, 4, 1)}"
+  cidr_block        = "${cidrsubnet(aws_vpc.thelma-dev-joel.cidr_block, 4, 1)}"
 }
 
-resource "aws_route_table" "doris_services_route_table" {
-  vpc_id = "${aws_vpc.doris_services.id}"
+resource "aws_route_table" "thelma-dev-joel-route_table" {
+  vpc_id = "${aws_vpc.thelma-dev-joel.id}"
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = "${aws_internet_gateway.doris_services_gateway.id}"
+    gateway_id = "${aws_internet_gateway.thelma-dev-joel-gateway.id}"
   }
 
   tags {
@@ -47,15 +54,15 @@ resource "aws_route_table" "doris_services_route_table" {
   }
 }
 
-resource "aws_route_table_association" "doris_service_route_association" {
-  subnet_id      = "${aws_subnet.doris_services_subnet.id}"
-  route_table_id = "${aws_route_table.doris_services_route_table.id}"
+resource "aws_route_table_association" "thelma-dev-joel-route_association" {
+  subnet_id      = "${aws_subnet.thelma-dev-joel-subnet.id}"
+  route_table_id = "${aws_route_table.thelma-dev-joel-route_table.id}"
 }
 
 resource "aws_security_group" "allow_all" {
   name        = "allow_all"
   description = "Allow all inbound traffic"
-  vpc_id      = "${aws_vpc.doris_services.id}"
+  vpc_id      = "${aws_vpc.thelma-dev-joel.id}"
 
   ingress {
     from_port = 0
@@ -100,42 +107,17 @@ resource "aws_security_group" "allow_all" {
   }
 }
 
-# resource "aws_lb" "alb_front" {
-# 	name		=	"front-alb"
-# 	internal	=	false
-# 	security_groups	=	["${aws_security_group.allow_all.id}"]
-# 	subnets		=	["${aws_subnet.doris_services_subnet.id}"]
-# 	#enable_deletion_protection	=	true
-# }
-
-# resource "aws_lb_target_group" "alb_front_http" {
-# 	name	= "alb-front-https"
-# 	vpc_id	= "${aws_vpc.doris_services.id}"
-# 	port	= "80"
-# 	protocol	= "HTTP"
-# 	health_check {
-#                 path = "/"
-#                 port = "80"
-#                 protocol = "HTTP"
-#                 healthy_threshold = 2
-#                 unhealthy_threshold = 2
-#                 interval = 5
-#                 timeout = 4
-#                 matcher = "200-308"
-#         }
-# }
-
-resource "aws_key_pair" "${var.prefix}-keys" {
+resource "aws_key_pair" "thelma-dev-joel-keys" {
   key_name   = "${var.prefix}-keys"
   public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDsDr5ftf168jwO99GYCL1+d/XtiV1hFkv+AIGKYIPF77V4kZSfj1bErU3khTUhQiRpvHc0I6S2tg4o54V/tUMbrGPEAfg+8n9KZARwTW50dRaO4DHAL0x4iwm60jyD03pg1CwRiNHDtAkX5WiqN6i7uVtfrTQ0T3QEqB9Dzh2IxeHW83V3KTWMQpW+EgtRK588hhCvSSF/VmT6sWgYaMJeVjfeidcsue3UYnWs0MJvPhqYMFSHCM5NsXbnPWsR2JqQYPP1P9r5+uI257evmKQWeExEWjlG+Vlz7DyXqjn+V0VShbhTjcggpidJnwCs6M/Xlutr/Ru263h/oqX7Esl9"
 }
 
-resource "aws_s3_bucket" "${var.prefix}-assets" {
+resource "aws_s3_bucket" "thelma-dev-joel-assets" {
   bucket = "${var.prefix}-assets"
   acl    = "public-read"
 }
 
-resource "aws_s3_bucket" "${var.prefix}-uploads" {
+resource "aws_s3_bucket" "thelma-dev-joel-uploads" {
   bucket = "${var.prefix}-uploads"
   acl    = "public-read"
 }
@@ -145,7 +127,7 @@ data "aws_ami" "base" {
 
   filter {
     name   = "name"
-    values = ["${var.prefix}-base-centos*"]
+    values = ["doris-hyku-base-centos*"]
   }
 
   filter {
@@ -161,7 +143,7 @@ data "aws_ami" "storage" {
 
   filter {
     name   = "name"
-    values = ["${var.prefix}-storage-centos*"]
+    values = ["doris-hyku-storage-centos*"]
   }
 
   filter {
@@ -177,7 +159,7 @@ data "aws_ami" "hyku" {
 
   filter {
     name   = "name"
-    values = ["${var.prefix}-hyku-centos*"]
+    values = ["doris-hyku-hyku-centos*"]
   }
 
   filter {
@@ -193,7 +175,7 @@ data "aws_ami" "archivematica" {
 
   filter {
     name   = "name"
-    values = ["${var.prefix}-archivematica-centos*"]
+    values = ["doris-hyku-archivematica-centos*"]
   }
 
   filter {
@@ -204,20 +186,6 @@ data "aws_ami" "archivematica" {
   owners = ["self"]
 }
 
-# data "aws_ami" "base" {
-#   most_recent = true
-#   filter {
-#     name = "name"
-#     values = ["RHEL-7.6_HVM_GA-201*-x86_64-0-Hourly2-GP2"]
-#   }
-#   filter {
-#     name   = "virtualization-type"
-#     values = ["hvm"]
-#   }
-
-#   owners = ["309956199498"]
-# } 
-
 resource "aws_instance" "storage" {
   ami           = "${data.aws_ami.storage.id}"
   instance_type = "m5.xlarge"
@@ -225,7 +193,7 @@ resource "aws_instance" "storage" {
   #disable_api_termination = true
   key_name                    = "${var.prefix}-keys"
   vpc_security_group_ids      = ["${aws_security_group.allow_all.id}"]
-  subnet_id                   = "${aws_subnet.doris_services_subnet.id}"
+  subnet_id                   = "${aws_subnet.thelma-dev-joel-subnet.id}"
   associate_public_ip_address = true
 
   root_block_device = {
@@ -245,7 +213,7 @@ resource "aws_instance" "hyku" {
   #disable_api_termination = true
   key_name                    = "${var.prefix}-keys"
   vpc_security_group_ids      = ["${aws_security_group.allow_all.id}"]
-  subnet_id                   = "${aws_subnet.doris_services_subnet.id}"
+  subnet_id                   = "${aws_subnet.thelma-dev-joel-subnet.id}"
   associate_public_ip_address = true
 
   root_block_device = {
@@ -265,7 +233,7 @@ resource "aws_instance" "archivematica" {
   #disable_api_termination = true
   key_name                    = "${var.prefix}-keys"
   vpc_security_group_ids      = ["${aws_security_group.allow_all.id}"]
-  subnet_id                   = "${aws_subnet.doris_services_subnet.id}"
+  subnet_id                   = "${aws_subnet.thelma-dev-joel-subnet.id}"
   associate_public_ip_address = true
 
   root_block_device = {
@@ -286,7 +254,7 @@ resource "aws_instance" "archivematica" {
 
 resource "aws_route53_record" "doris-db" {
   zone_id = "Z37PTQKK7X14DM"
-  name    = "services-db.getinfo.nyc"
+  name    = "services-db.thelma-dev-joel.getinfo.nyc"
   type    = "A"
   ttl     = "300"
   records = ["${aws_instance.storage.private_ip}"]
@@ -294,7 +262,7 @@ resource "aws_route53_record" "doris-db" {
 
 resource "aws_route53_record" "doris-db-ext" {
   zone_id = "Z37PTQKK7X14DM"
-  name    = "services-db-ext.getinfo.nyc"
+  name    = "services-db-ext.thelma-dev-joel.getinfo.nyc"
   type    = "A"
   ttl     = "300"
   records = ["${aws_instance.storage.public_ip}"]
@@ -302,7 +270,7 @@ resource "aws_route53_record" "doris-db-ext" {
 
 resource "aws_route53_record" "doris-hyku" {
   zone_id = "Z37PTQKK7X14DM"
-  name    = "hyku.getinfo.nyc"
+  name    = "hyku.thelma-dev-joel.getinfo.nyc"
   type    = "A"
   ttl     = "300"
   records = ["${aws_instance.hyku.public_ip}"]
@@ -310,7 +278,7 @@ resource "aws_route53_record" "doris-hyku" {
 
 resource "aws_route53_record" "doris-archivematica" {
   zone_id = "Z37PTQKK7X14DM"
-  name    = "archivematica.getinfo.nyc"
+  name    = "archivematica.thelma-dev-joel.getinfo.nyc"
   type    = "A"
   ttl     = "300"
   records = ["${aws_instance.archivematica.public_ip}"]

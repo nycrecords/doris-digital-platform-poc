@@ -1,5 +1,5 @@
 *.tfstate*
-ssh/doris-services-keys
+ssh/*
 .terraform
 terraform/.env
 secrets.tgz
@@ -21,6 +21,8 @@ crash.log
 #
 # example.tfvars
 dev.tfvars
+stg.tfvars
+prd.tfvars
 
 # Ignore override files as they are usually used to override resources locally and so
 # are not checked in
@@ -35,4 +37,5 @@ override.tf.json
 
 # Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
 # example: *tfplan*
+*.tfplan
 

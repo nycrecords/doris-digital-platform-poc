@@ -3,4 +3,5 @@
 	url = git@github.com:notch8/doris-hyku.git
 [submodule "packer"]
 	path = packer
-	url = git@github.com:notch8/packer-samvera.git
+	url = git@github.com:nycrecords/packer-samvera.git
+	branch = master
