@@ -26,8 +26,13 @@ variable "remote_state_hostname" {
 variable "remote_state_organization" {
   description = "Organization for remote state"
 }
+
 variable "remote_state_workspace_name" {
   description = "Workspace Name for remote state"
+}
+
+variable "azurerm_resource_group_name" {
+  description = "Resource Group for Azure"
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
