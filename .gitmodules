@@ -1,6 +1,7 @@
 [submodule "hyku"]
 	path = hyku
-	url = git@github.com:notch8/doris-hyku.git
+	url = git@github.com:nycrecords/doris-hyku.git
+	branch = master
 [submodule "packer"]
 	path = packer
 	url = git@github.com:nycrecords/packer-samvera.git
