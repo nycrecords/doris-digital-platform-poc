@@ -2,8 +2,34 @@ provider "azurerm" {
   skip_provider_registration = true
 }
 
-variable "prefix" {
-  default = "doris"
+provider "aws" {
+  region     = "${var.aws_region}"
+  access_key = "${var.aws_access_key}"
+  secret_key = "${var.aws_secret_key}"
+}
+
+resource "aws_route53_record" "doris-db-ext" {
+  zone_id = "Z37PTQKK7X14DM"
+  name    = "services-db-ext.thelma-dev-joel.getinfo.nyc"
+  type    = "A"
+  ttl     = "300"
+  records = ["${data.azurerm_public_ip.data-storage-pip.ip_address}"]
+}
+
+resource "aws_route53_record" "doris-hyku" {
+  zone_id = "Z37PTQKK7X14DM"
+  name    = "hyku.thelma-dev-joel.getinfo.nyc"
+  type    = "A"
+  ttl     = "300"
+  records = ["${data.azurerm_public_ip.data-hyku-pip.ip_address}"]
+}
+
+resource "aws_route53_record" "doris-archivematica" {
+  zone_id = "Z37PTQKK7X14DM"
+  name    = "archivematica.thelma-dev-joel.getinfo.nyc"
+  type    = "A"
+  ttl     = "300"
+  records = ["${data.azurerm_public_ip.data-archivematica-pip.ip_address}"]
 }
 
 data "azurerm_resource_group" "rg" {
@@ -150,7 +176,7 @@ resource "azurerm_virtual_machine" "storage" {
     create_option     = "Attach"
   }
 
-  tags {
+  tags = {
     storage = "storage-1"
   }
 }
@@ -219,7 +245,7 @@ resource "azurerm_virtual_machine" "hyku" {
     create_option     = "Attach"
   }
 
-  tags {
+  tags = {
     hyku = "hyku-1"
   }
 }
@@ -288,7 +314,7 @@ resource "azurerm_virtual_machine" "archivematica" {
     create_option     = "Attach"
   }
 
-  tags {
+  tags = {
     archivematica = "archivematica-1"
   }
 }
