@@ -80,7 +80,7 @@ resources:
   - repository: templates
     type: git
     name: cs-terraform/pipeline-templates
-    ref: develop
+    ref: refs/tags/0.0.1
 
 # CI Triggers
 trigger:
