@@ -3,20 +3,36 @@
 # You must provide a value for each of these parameters.
 # ---------------------------------------------------------------------------------------------------------------------
 
-variable "prefix" {
-  description = "Name for all resources created in this module"
+variable "azurerm_resource_group_network" {
+  description = "Name for Network Resource Group (DoITT Managed)"
 }
 
-variable "cidr_range" {
-  description = "The CIDR range to use for the VPC"
+variable "azurerm_resource_group_non_prd" {
+  description = "Name for Non-PRD Resource Group (DoITT Managed)"
 }
 
-variable "aws_access_key" {
-  description = "AWS Access Key"
+variable "azurerm_resource_group_prd" {
+  description = "Name for PRD Resource Group (DoITT Managed)"
 }
 
-variable "aws_secret_key" {
-  description = "AWS Secret Key"
+variable "azurerm_virtual_network_name" {
+  description = "Name for Azure Vnet (DoITT Managed)"
+}
+
+variable "azurerm_subnet_public_01" {
+  description = "Name for Azure Subnet - Public01 (DoITT Managed)"
+}
+
+variable "azurerm_subnet_public_02" {
+  description = "Name for Azure Subnet - Public02 (DoITT Managed)"
+}
+
+variable "azurerm_subnet_private_01" {
+  description = "Name for Azure Subnet - Private01 (DoITT Managed)"
+}
+
+variable "azurerm_subnet_private_02" {
+  description = "Name for Azure Subnet - Private02 (DoITT Managed)"
 }
 
 variable "remote_state_hostname" {
@@ -29,10 +45,6 @@ variable "remote_state_organization" {
 
 variable "remote_state_workspace_name" {
   description = "Workspace Name for remote state"
-}
-
-variable "azurerm_resource_group_name" {
-  description = "Resource Group for Azure"
 }
 
 # ---------------------------------------------------------------------------------------------------------------------

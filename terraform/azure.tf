@@ -2,133 +2,60 @@ provider "azurerm" {
   skip_provider_registration = true
 }
 
-provider "aws" {
-  region     = "${var.aws_region}"
-  access_key = "${var.aws_access_key}"
-  secret_key = "${var.aws_secret_key}"
+### Network Resources 
+### Managed by DOITT
+data "azurerm_resource_group" "rg-network" {
+  name = "${var.azurerm_resource_group_network}"
 }
 
-resource "aws_route53_record" "doris-db-ext" {
-  zone_id = "Z37PTQKK7X14DM"
-  name    = "services-db-ext.thelma-dev-joel.getinfo.nyc"
-  type    = "A"
-  ttl     = "300"
-  records = ["${data.azurerm_public_ip.data-storage-pip.ip_address}"]
+data "azurerm_resource_group" "rg-non-prd" {
+  name = "${var.azurerm_resource_group_non_prd}"
 }
 
-resource "aws_route53_record" "doris-hyku" {
-  zone_id = "Z37PTQKK7X14DM"
-  name    = "hyku.thelma-dev-joel.getinfo.nyc"
-  type    = "A"
-  ttl     = "300"
-  records = ["${data.azurerm_public_ip.data-hyku-pip.ip_address}"]
+data "azurerm_resource_group" "rg-prd" {
+  name = "${var.azurerm_resource_group_prd}"
 }
 
-resource "aws_route53_record" "doris-archivematica" {
-  zone_id = "Z37PTQKK7X14DM"
-  name    = "archivematica.thelma-dev-joel.getinfo.nyc"
-  type    = "A"
-  ttl     = "300"
-  records = ["${data.azurerm_public_ip.data-archivematica-pip.ip_address}"]
+data "azurerm_virtual_network" "vnet" {
+  name                = "${var.azurerm_virtual_network_name}"
+  resource_group_name = "${var.azurerm_resource_group_name}"
 }
 
-data "azurerm_resource_group" "rg" {
-  name = "${var.azurerm_resource_group_name}"
+data "azurerm_subnet" "subnet-public-01" {
+  name                 = "${var.azurerm_subnet_public_01}"
+  virtual_network_name = "${var.azurerm_virtual_network_name}"
+  resource_group_name  = "${var.azurerm_resource_group_network}"
 }
 
-resource "azurerm_virtual_network" "vnet" {
-  name                = "${var.prefix}-network"
-  address_space       = ["10.0.0.0/16"]
-  location            = "${data.azurerm_resource_group.rg.location}"
-  resource_group_name = "${data.azurerm_resource_group.rg.name}"
+
+data "azurerm_subnet" "subnet-public-02" {
+  name                 = "${var.azurerm_subnet_public_02}"
+  virtual_network_name = "${var.azurerm_virtual_network_name}"
+  resource_group_name  = "${var.azurerm_resource_group_network}"
 }
 
-resource "azurerm_subnet" "subnet" {
-  name                 = "subnet"
-  resource_group_name  = "${data.azurerm_resource_group.rg.name}"
-  virtual_network_name = "${azurerm_virtual_network.vnet.name}"
-  address_prefix       = "10.0.2.0/24"
+
+data "azurerm_subnet" "subnet-private-01" {
+  name                 = "${var.azurerm_subnet_privat_-0}"
+  virtual_network_name = "${var.azurerm_virtual_network_name}"
+  resource_group_name  = "${var.azurerm_resource_group_network}"
 }
 
-resource "azurerm_network_security_group" "nsg" {
+
+data "azurerm_subnet" "subnet-private-02" {
+  name                 = "${var.azurerm_subnet_privat_-0}"
+  virtual_network_name = "${var.azurerm_virtual_network_name}"
+  resource_group_name  = "${var.azurerm_resource_group_network}"
+}
+
+data "azurerm_network_security_group" "nsg" {
   name                = "${var.prefix}-nsg"
   location            = "${data.azurerm_resource_group.rg.location}"
   resource_group_name = "${data.azurerm_resource_group.rg.name}"
 
-  security_rule {
-    name                       = "allow-ssh"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "22"
-    destination_port_range     = "22"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  security_rule {
-    name                       = "allow-http"
-    priority                   = 200
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "80"
-    destination_port_range     = "80"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  security_rule {
-    name                       = "allow-https"
-    priority                   = 300
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "443"
-    destination_port_range     = "443"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  security_rule {
-    name                       = "allow-web"
-    priority                   = 400
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "8000"
-    destination_port_range     = "8000"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
 }
 
-resource "azurerm_subnet_network_security_group_association" "test" {
-  subnet_id                 = "${azurerm_subnet.subnet.id}"
-  network_security_group_id = "${azurerm_network_security_group.nsg.id}"
-}
-
-resource "azurerm_public_ip" "storage-pip" {
-  name                = "${var.prefix}-storage-pip"
-  location            = "${data.azurerm_resource_group.rg.location}"
-  resource_group_name = "${data.azurerm_resource_group.rg.name}"
-  allocation_method   = "Dynamic"
-}
-
-resource "azurerm_network_interface" "storage-nic" {
-  name                = "${var.prefix}-storage-nic"
-  location            = "${data.azurerm_resource_group.rg.location}"
-  resource_group_name = "${data.azurerm_resource_group.rg.name}"
-
-  ip_configuration {
-    name                          = "testconfiguration1"
-    subnet_id                     = "${azurerm_subnet.subnet.id}"
-    private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = "${azurerm_public_ip.storage-pip.id}"
-  }
-}
-
+### VM Images
 data "azurerm_platform_image" "centos" {
   location  = "${data.azurerm_resource_group.rg.location}"
   publisher = "OpenLogic"
@@ -138,10 +65,24 @@ data "azurerm_platform_image" "centos" {
   # version   = "latest"
 }
 
+### Storage VM
+resource "azurerm_network_interface" "storage-nic" {
+  name                = "${var.prefix}-storage-nic"
+  location            = "${data.azurerm_resource_group.rg-non-prd.location}"
+  resource_group_name = "${data.azurerm_resource_group.rg-non-prd.name}"
+
+  ip_configuration {
+    name                          = "testconfiguration1"
+    subnet_id                     = "${azurerm_subnet.subnet.id}"
+    private_ip_address_allocation = "Dynamic"
+  }
+}
+
+
 resource "azurerm_managed_disk" "storage-osdisk" {
   name                = "storage-osdisk"
-  location            = "${data.azurerm_resource_group.rg.location}"
-  resource_group_name = "${data.azurerm_resource_group.rg.name}"
+  location            = "${data.azurerm_resource_group.rg-non-prd.location}"
+  resource_group_name = "${data.azurerm_resource_group.rg-non-prd.name}"
 
   #os_type              = "linux"
   storage_account_type = "Premium_LRS"
@@ -154,8 +95,8 @@ resource "azurerm_managed_disk" "storage-osdisk" {
 
 resource "azurerm_virtual_machine" "storage" {
   name                  = "${var.prefix}-storage"
-  location              = "${data.azurerm_resource_group.rg.location}"
-  resource_group_name   = "${data.azurerm_resource_group.rg.name}"
+  location              = "${data.azurerm_resource_group.rg-non-prd.location}"
+  resource_group_name   = "${data.azurerm_resource_group.rg-non-prd.name}"
   network_interface_ids = ["${azurerm_network_interface.storage-nic.id}"]
   vm_size               = "Standard_D4s_v3"
 
@@ -177,40 +118,30 @@ resource "azurerm_virtual_machine" "storage" {
   }
 
   tags = {
-    storage = "storage-1"
+    Agency  = "DORIS"
+    Project = "THELMA POC"
+    Purpose = "Storage"
   }
 }
 
-data "azurerm_public_ip" "data-storage-pip" {
-  name                = "${azurerm_public_ip.storage-pip.name}"
-  resource_group_name = "${data.azurerm_resource_group.rg.name}"
-  depends_on          = ["azurerm_virtual_machine.storage"]
-}
 
-resource "azurerm_public_ip" "hyku-pip" {
-  name                = "${var.prefix}-hyku-pip"
-  location            = "${data.azurerm_resource_group.rg.location}"
-  resource_group_name = "${data.azurerm_resource_group.rg.name}"
-  allocation_method   = "Dynamic"
-}
-
+### Hyku App VM 
 resource "azurerm_network_interface" "hyku-nic" {
   name                = "${var.prefix}-hyku-nic"
-  location            = "${data.azurerm_resource_group.rg.location}"
-  resource_group_name = "${data.azurerm_resource_group.rg.name}"
+  location            = "${data.azurerm_resource_group.rg-non-prd.location}"
+  resource_group_name = "${data.azurerm_resource_group.rg-non-prd.name}"
 
   ip_configuration {
-    name                          = "testconfiguration1"
-    subnet_id                     = "${azurerm_subnet.subnet.id}"
+    name                          = "thelma-poc-hyku-nic"
+    subnet_id                     = "${data.azurerm_subnet.subnet.id}"
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = "${azurerm_public_ip.hyku-pip.id}"
   }
 }
 
 resource "azurerm_managed_disk" "hyku-osdisk" {
   name                = "hyku-osdisk"
-  location            = "${data.azurerm_resource_group.rg.location}"
-  resource_group_name = "${data.azurerm_resource_group.rg.name}"
+  location            = "${data.azurerm_resource_group.rg-non-prd.location}"
+  resource_group_name = "${data.azurerm_resource_group.rg-non-prd.name}"
 
   #os_type              = "linux"
   storage_account_type = "Premium_LRS"
@@ -223,8 +154,8 @@ resource "azurerm_managed_disk" "hyku-osdisk" {
 
 resource "azurerm_virtual_machine" "hyku" {
   name                  = "${var.prefix}-hyku"
-  location              = "${data.azurerm_resource_group.rg.location}"
-  resource_group_name   = "${data.azurerm_resource_group.rg.name}"
+  location              = "${data.azurerm_resource_group.rg-non-prd.location}"
+  resource_group_name   = "${data.azurerm_resource_group.rg-non-prd.name}"
   network_interface_ids = ["${azurerm_network_interface.hyku-nic.id}"]
   vm_size               = "Standard_D4s_v3"
 
@@ -250,36 +181,24 @@ resource "azurerm_virtual_machine" "hyku" {
   }
 }
 
-data "azurerm_public_ip" "data-hyku-pip" {
-  name                = "${azurerm_public_ip.hyku-pip.name}"
-  resource_group_name = "${data.azurerm_resource_group.rg.name}"
-  depends_on          = ["azurerm_virtual_machine.hyku"]
-}
 
-resource "azurerm_public_ip" "archivematica-pip" {
-  name                = "${var.prefix}-archivematica-pip"
-  location            = "${data.azurerm_resource_group.rg.location}"
-  resource_group_name = "${data.azurerm_resource_group.rg.name}"
-  allocation_method   = "Dynamic"
-}
-
+### Archivematica VM
 resource "azurerm_network_interface" "archivematica-nic" {
   name                = "${var.prefix}-archivematica-nic"
-  location            = "${data.azurerm_resource_group.rg.location}"
-  resource_group_name = "${data.azurerm_resource_group.rg.name}"
+  location            = "${data.azurerm_resource_group.rg-non-prd.location}"
+  resource_group_name = "${data.azurerm_resource_group.rg-non-prd.name}"
 
   ip_configuration {
     name                          = "testconfiguration1"
     subnet_id                     = "${azurerm_subnet.subnet.id}"
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = "${azurerm_public_ip.archivematica-pip.id}"
   }
 }
 
 resource "azurerm_managed_disk" "archivematica-osdisk" {
   name                = "archivematica-osdisk"
-  location            = "${data.azurerm_resource_group.rg.location}"
-  resource_group_name = "${data.azurerm_resource_group.rg.name}"
+  location            = "${data.azurerm_resource_group.rg-non-prd.location}"
+  resource_group_name = "${data.azurerm_resource_group.rg-non-prd.name}"
 
   #os_type              = "linux"
   storage_account_type = "Premium_LRS"
@@ -292,8 +211,8 @@ resource "azurerm_managed_disk" "archivematica-osdisk" {
 
 resource "azurerm_virtual_machine" "archivematica" {
   name                  = "${var.prefix}-archivematica"
-  location              = "${data.azurerm_resource_group.rg.location}"
-  resource_group_name   = "${data.azurerm_resource_group.rg.name}"
+  location              = "${data.azurerm_resource_group.rg-non-prd.location}"
+  resource_group_name   = "${data.azurerm_resource_group.rg-non-prd.name}"
   network_interface_ids = ["${azurerm_network_interface.archivematica-nic.id}"]
   vm_size               = "Standard_D4s_v3"
 
@@ -319,53 +238,46 @@ resource "azurerm_virtual_machine" "archivematica" {
   }
 }
 
-data "azurerm_public_ip" "data-archivematica-pip" {
-  name                = "${azurerm_public_ip.archivematica-pip.name}"
-  resource_group_name = "${data.azurerm_resource_group.rg.name}"
-  depends_on          = ["azurerm_virtual_machine.archivematica"]
-}
-
 ### Storage creation
-resource "azurerm_storage_account" "doris-services-assets" {
-  name                     = "dorisservicesassets"
-  resource_group_name      = "${data.azurerm_resource_group.rg.name}"
-  location                 = "${data.azurerm_resource_group.rg.location}"
+resource "azurerm_storage_account" "thelma-poc-assets-storage-acct" {
+  name                     = "thelmapocassets"
+  location                 = "${data.azurerm_resource_group.rg-non-prd.location}"
+  resource_group_name      = "${data.azurerm_resource_group.rg-non-prd.name}"
   account_tier             = "Standard"
   account_replication_type = "LRS"
 }
 
-resource "azurerm_storage_container" "doris-services-assets" {
-  name                  = "dorisservicesassets"
-  resource_group_name   = "${data.azurerm_resource_group.rg.name}"
-  storage_account_name  = "${azurerm_storage_account.doris-services-assets.name}"
+resource "azurerm_storage_container" "thelma-poc-assets" {
+  name                  = "thelmapocassets"
+  resource_group_name   = "${data.azurerm_resource_group.rg-non-prd.name}"
+  storage_account_name  = "${azurerm_storage_account.thelma-poc-assets.name}"
   container_access_type = "container"
 }
 
-resource "azurerm_storage_account" "doris-services-uploads" {
-  name                     = "dorisservicesuploads"
-  resource_group_name      = "${data.azurerm_resource_group.rg.name}"
-  location                 = "${data.azurerm_resource_group.rg.location}"
+resource "azurerm_storage_account" "thelma-poc-uploads-storage-acct" {
+  name                     = "thelmapocuploads"
+  location                 = "${data.azurerm_resource_group.rg-non-prd.location}"
+  resource_group_name      = "${data.azurerm_resource_group.rg-non-prd.name}"
   account_tier             = "Standard"
   account_replication_type = "LRS"
 }
 
-resource "azurerm_storage_container" "doris-services-uploads" {
-  name                  = "dorisservicesuploads"
-  resource_group_name   = "${data.azurerm_resource_group.rg.name}"
-  storage_account_name  = "${azurerm_storage_account.doris-services-uploads.name}"
+resource "azurerm_storage_container" "thelma-poc-uploads" {
+  name                  = "thelmapocuploads"
+  resource_group_name   = "${data.azurerm_resource_group.rg-non-prd.name}"
+  storage_account_name  = "${azurerm_storage_account.thelma-poc-uploads.name}"
   container_access_type = "container"
 }
 
-### Output part
-
-output "public_storage_ip_address" {
-  value = "${data.azurerm_public_ip.data-storage-pip.ip_address}"
+### Outputs
+output "storage_ip_address" {
+  value = "${azurerm_network_interface.storage-nic.private_ip_address}"
 }
 
-output "public_hyku_ip_address" {
-  value = "${data.azurerm_public_ip.data-hyku-pip.ip_address}"
+output "hyku_ip_address" {
+  value = "${azurerm_network_interface.hyku-nic.private_ip_address}"
 }
 
-output "public_archivematica_ip_address" {
-  value = "${data.azurerm_public_ip.data-archivematica-pip.ip_address}"
+output "archivematica_ip_address" {
+  value = "${azurerm_network_interface.archivematica-nic.private_ip_address}"
 }
