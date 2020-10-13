@@ -39,18 +39,6 @@ variable "azurerm_subnet_private_02" {
   description = "Name for Azure Subnet - Private02 (DoITT Managed)"
 }
 
-variable "remote_state_hostname" {
-  description = "Hostname for remote state storage"
-}
-
-variable "remote_state_organization" {
-  description = "Organization for remote state"
-}
-
-variable "remote_state_workspace_name" {
-  description = "Workspace Name for remote state"
-}
-
 # ---------------------------------------------------------------------------------------------------------------------
 # OPTIONAL PARAMETERS
 # These parameters have reasonable defaults.
