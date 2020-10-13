@@ -1,4 +1,4 @@
-# Terraform release pipeline
+---
 variables:
   - name: tf_azure_service_connection
     value: 'SPN-AZDO-DORIS'
@@ -84,7 +84,13 @@ resources:
 
 # CI Triggers
 trigger:
-- develop
+  batch: true
+  branches:
+    include:
+      - "*"
+  paths:
+    include: 
+      - terraform/aws/*
 
 pool: $(pool)
 
