@@ -246,7 +246,7 @@ resource "azurerm_storage_account" "thelma-poc-assets-storage-acct" {
 resource "azurerm_storage_container" "thelma-poc-assets" {
   name                  = "thelmapocassets"
   storage_account_name  = azurerm_storage_account.thelma-poc-assets-storage-acct.name
-  container_access_type = "container"
+  container_access_type = "private"
 }
 
 resource "azurerm_storage_account" "thelma-poc-uploads-storage-acct" {
@@ -260,7 +260,7 @@ resource "azurerm_storage_account" "thelma-poc-uploads-storage-acct" {
 resource "azurerm_storage_container" "thelma-poc-uploads" {
   name                  = "thelmapocuploads"
   storage_account_name  = azurerm_storage_account.thelma-poc-uploads-storage-acct.name
-  container_access_type = "container"
+  container_access_type = "private"
 }
 
 ### Outputs
