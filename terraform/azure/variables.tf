@@ -63,3 +63,7 @@ variable "prefix" {
   default     = "thelmapoc"
 }
 
+variable "tags" {
+  type    = map
+  default = {}
+}

@@ -178,11 +178,7 @@ resource "azurerm_virtual_machine" "hyku" {
     create_option     = "Attach"
   }
 
-  tags = {
-    Agency  = "DORIS"
-    Project = "THELMA POC"
-    Purpose = "Hyku"
-  }
+  tags = merge(var.tags, map("Name", "my resource"))
 }
 
 ### Archivematica VM
