@@ -72,6 +72,6 @@ variable "domain_name" {
 
 variable "prefix" {
   description = "Prefix for resource names"
-  default = "thelmapoc"
+  default     = "thelmapoc"
 }
 
