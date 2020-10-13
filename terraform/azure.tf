@@ -68,7 +68,7 @@ resource "azurerm_network_interface" "storage-nic" {
 
   ip_configuration {
     name                          = "testconfiguration1"
-    subnet_id                     = data.azurerm_subnet.subnet-public-01
+    subnet_id                     = data.azurerm_subnet.subnet-public-01.id
     private_ip_address_allocation = "Dynamic"
   }
 }
@@ -126,7 +126,7 @@ resource "azurerm_network_interface" "hyku-nic" {
 
   ip_configuration {
     name                          = "thelma-poc-hyku-nic"
-    subnet_id                     = data.azurerm_subnet.subnet-public-01
+    subnet_id                     = data.azurerm_subnet.subnet-public-01.id
     private_ip_address_allocation = "Dynamic"
   }
 }
@@ -184,7 +184,7 @@ resource "azurerm_network_interface" "archivematica-nic" {
 
   ip_configuration {
     name                          = "testconfiguration1"
-    subnet_id                     = data.azurerm_subnet.subnet-public-01
+    subnet_id                     = data.azurerm_subnet.subnet-public-01.id
     private_ip_address_allocation = "Dynamic"
   }
 }
