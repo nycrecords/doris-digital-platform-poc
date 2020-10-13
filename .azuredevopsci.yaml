@@ -54,6 +54,10 @@ parameters:
     displayName: Application description
     type: string
     default: test
+  - name: ChangeTicketNumber
+    displayName: Change Ticket Number
+    type: string
+    default: INC000
   - name: Project
     displayName: Project Name
     type: string
