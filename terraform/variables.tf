@@ -19,6 +19,10 @@ variable "azurerm_virtual_network_name" {
   description = "Name for Azure Vnet (DoITT Managed)"
 }
 
+variable "azurerm_virtual_network_security_group_name" {
+  description = "Name for Azure NSG (DoITT Managed)"
+}
+
 variable "azurerm_subnet_public_01" {
   description = "Name for Azure Subnet - Public01 (DoITT Managed)"
 }
@@ -65,3 +69,9 @@ variable "domain_name" {
   description = "The base domain name used for all URLs"
   default     = "getinfo.nyc"
 }
+
+variable "prefix" {
+  description = "Prefix for resource names"
+  default = "thelmapoc"
+}
+

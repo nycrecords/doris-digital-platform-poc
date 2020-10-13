@@ -1,103 +1,97 @@
 provider "azurerm" {
-  skip_provider_registration = true
+  version = "~>2.20.0"
+  features {}
 }
 
 ### Network Resources 
 ### Managed by DOITT
 data "azurerm_resource_group" "rg-network" {
-  name = "${var.azurerm_resource_group_network}"
+  name = var.azurerm_resource_group_network
 }
 
 data "azurerm_resource_group" "rg-non-prd" {
-  name = "${var.azurerm_resource_group_non_prd}"
+  name = var.azurerm_resource_group_non_prd
 }
 
 data "azurerm_resource_group" "rg-prd" {
-  name = "${var.azurerm_resource_group_prd}"
+  name = var.azurerm_resource_group_prd
 }
 
 data "azurerm_virtual_network" "vnet" {
-  name                = "${var.azurerm_virtual_network_name}"
-  resource_group_name = "${var.azurerm_resource_group_name}"
+  name                = var.azurerm_virtual_network_name
+  resource_group_name = var.azurerm_resource_group_network
 }
 
 data "azurerm_subnet" "subnet-public-01" {
-  name                 = "${var.azurerm_subnet_public_01}"
-  virtual_network_name = "${var.azurerm_virtual_network_name}"
-  resource_group_name  = "${var.azurerm_resource_group_network}"
+  name                 = var.azurerm_subnet_public_01
+  virtual_network_name = var.azurerm_virtual_network_name
+  resource_group_name  = var.azurerm_resource_group_network
 }
-
 
 data "azurerm_subnet" "subnet-public-02" {
-  name                 = "${var.azurerm_subnet_public_02}"
-  virtual_network_name = "${var.azurerm_virtual_network_name}"
-  resource_group_name  = "${var.azurerm_resource_group_network}"
+  name                 = var.azurerm_subnet_public_02
+  virtual_network_name = var.azurerm_virtual_network_name
+  resource_group_name  = var.azurerm_resource_group_network
 }
-
 
 data "azurerm_subnet" "subnet-private-01" {
-  name                 = "${var.azurerm_subnet_privat_-0}"
-  virtual_network_name = "${var.azurerm_virtual_network_name}"
-  resource_group_name  = "${var.azurerm_resource_group_network}"
+  name                 = var.azurerm_subnet_private_01
+  virtual_network_name = var.azurerm_virtual_network_name
+  resource_group_name  = var.azurerm_resource_group_network
 }
 
-
 data "azurerm_subnet" "subnet-private-02" {
-  name                 = "${var.azurerm_subnet_privat_-0}"
-  virtual_network_name = "${var.azurerm_virtual_network_name}"
-  resource_group_name  = "${var.azurerm_resource_group_network}"
+  name                 = var.azurerm_subnet_private_02
+  virtual_network_name = var.azurerm_virtual_network_name
+  resource_group_name  = var.azurerm_resource_group_network
 }
 
 data "azurerm_network_security_group" "nsg" {
-  name                = "${var.prefix}-nsg"
-  location            = "${data.azurerm_resource_group.rg.location}"
-  resource_group_name = "${data.azurerm_resource_group.rg.name}"
-
+  name                = var.azurerm_virtual_network_security_group_name
+  resource_group_name = data.azurerm_resource_group.rg-network.name
 }
 
 ### VM Images
 data "azurerm_platform_image" "centos" {
-  location  = "${data.azurerm_resource_group.rg.location}"
+  location  = data.azurerm_resource_group.rg-network.location
   publisher = "OpenLogic"
   offer     = "CentOS"
   sku       = "7.5"
-
   # version   = "latest"
 }
 
 ### Storage VM
 resource "azurerm_network_interface" "storage-nic" {
   name                = "${var.prefix}-storage-nic"
-  location            = "${data.azurerm_resource_group.rg-non-prd.location}"
-  resource_group_name = "${data.azurerm_resource_group.rg-non-prd.name}"
+  location            = data.azurerm_resource_group.rg-non-prd.location
+  resource_group_name = data.azurerm_resource_group.rg-non-prd.name
 
   ip_configuration {
     name                          = "testconfiguration1"
-    subnet_id                     = "${azurerm_subnet.subnet.id}"
+    subnet_id                     = data.azurerm_subnet.subnet-public-01
     private_ip_address_allocation = "Dynamic"
   }
 }
 
-
 resource "azurerm_managed_disk" "storage-osdisk" {
   name                = "storage-osdisk"
-  location            = "${data.azurerm_resource_group.rg-non-prd.location}"
-  resource_group_name = "${data.azurerm_resource_group.rg-non-prd.name}"
+  location            = data.azurerm_resource_group.rg-non-prd.location
+  resource_group_name = data.azurerm_resource_group.rg-non-prd.name
 
   #os_type              = "linux"
   storage_account_type = "Premium_LRS"
   create_option        = "FromImage"
 
   #source_uri           = ""
-  image_reference_id = "${data.azurerm_platform_image.centos.id}"
+  image_reference_id = data.azurerm_platform_image.centos.id
   disk_size_gb       = "1000"
 }
 
 resource "azurerm_virtual_machine" "storage" {
   name                  = "${var.prefix}-storage"
-  location              = "${data.azurerm_resource_group.rg-non-prd.location}"
-  resource_group_name   = "${data.azurerm_resource_group.rg-non-prd.name}"
-  network_interface_ids = ["${azurerm_network_interface.storage-nic.id}"]
+  location              = data.azurerm_resource_group.rg-non-prd.location
+  resource_group_name   = data.azurerm_resource_group.rg-non-prd.name
+  network_interface_ids = [azurerm_network_interface.storage-nic.id]
   vm_size               = "Standard_D4s_v3"
 
   # Uncomment this line to delete the OS disk automatically when deleting the VM
@@ -111,7 +105,7 @@ resource "azurerm_virtual_machine" "storage" {
 
     # if this is provided, os_profile is not allowed
     os_type           = "linux"
-    managed_disk_id   = "${azurerm_managed_disk.storage-osdisk.id}"
+    managed_disk_id   = azurerm_managed_disk.storage-osdisk.id
     managed_disk_type = "Premium_LRS"
     caching           = "ReadWrite"
     create_option     = "Attach"
@@ -124,39 +118,38 @@ resource "azurerm_virtual_machine" "storage" {
   }
 }
 
-
 ### Hyku App VM 
 resource "azurerm_network_interface" "hyku-nic" {
   name                = "${var.prefix}-hyku-nic"
-  location            = "${data.azurerm_resource_group.rg-non-prd.location}"
-  resource_group_name = "${data.azurerm_resource_group.rg-non-prd.name}"
+  location            = data.azurerm_resource_group.rg-non-prd.location
+  resource_group_name = data.azurerm_resource_group.rg-non-prd.name
 
   ip_configuration {
     name                          = "thelma-poc-hyku-nic"
-    subnet_id                     = "${data.azurerm_subnet.subnet.id}"
+    subnet_id                     = data.azurerm_subnet.subnet-public-01
     private_ip_address_allocation = "Dynamic"
   }
 }
 
 resource "azurerm_managed_disk" "hyku-osdisk" {
   name                = "hyku-osdisk"
-  location            = "${data.azurerm_resource_group.rg-non-prd.location}"
-  resource_group_name = "${data.azurerm_resource_group.rg-non-prd.name}"
+  location            = data.azurerm_resource_group.rg-non-prd.location
+  resource_group_name = data.azurerm_resource_group.rg-non-prd.name
 
   #os_type              = "linux"
   storage_account_type = "Premium_LRS"
   create_option        = "FromImage"
 
   #source_uri           = ""
-  image_reference_id = "${data.azurerm_platform_image.centos.id}"
+  image_reference_id = data.azurerm_platform_image.centos.id
   disk_size_gb       = "1000"
 }
 
 resource "azurerm_virtual_machine" "hyku" {
   name                  = "${var.prefix}-hyku"
-  location              = "${data.azurerm_resource_group.rg-non-prd.location}"
-  resource_group_name   = "${data.azurerm_resource_group.rg-non-prd.name}"
-  network_interface_ids = ["${azurerm_network_interface.hyku-nic.id}"]
+  location              = data.azurerm_resource_group.rg-non-prd.location
+  resource_group_name   = data.azurerm_resource_group.rg-non-prd.name
+  network_interface_ids = [azurerm_network_interface.hyku-nic.id]
   vm_size               = "Standard_D4s_v3"
 
   # Uncomment this line to delete the OS disk automatically when deleting the VM
@@ -170,7 +163,7 @@ resource "azurerm_virtual_machine" "hyku" {
 
     # if this is provided, os_profile is not allowed
     os_type           = "linux"
-    managed_disk_id   = "${azurerm_managed_disk.hyku-osdisk.id}"
+    managed_disk_id   = azurerm_managed_disk.hyku-osdisk.id
     managed_disk_type = "Premium_LRS"
     caching           = "ReadWrite"
     create_option     = "Attach"
@@ -183,39 +176,38 @@ resource "azurerm_virtual_machine" "hyku" {
   }
 }
 
-
 ### Archivematica VM
 resource "azurerm_network_interface" "archivematica-nic" {
   name                = "${var.prefix}-archivematica-nic"
-  location            = "${data.azurerm_resource_group.rg-non-prd.location}"
-  resource_group_name = "${data.azurerm_resource_group.rg-non-prd.name}"
+  location            = data.azurerm_resource_group.rg-non-prd.location
+  resource_group_name = data.azurerm_resource_group.rg-non-prd.name
 
   ip_configuration {
     name                          = "testconfiguration1"
-    subnet_id                     = "${azurerm_subnet.subnet.id}"
+    subnet_id                     = data.azurerm_subnet.subnet-public-01
     private_ip_address_allocation = "Dynamic"
   }
 }
 
 resource "azurerm_managed_disk" "archivematica-osdisk" {
   name                = "archivematica-osdisk"
-  location            = "${data.azurerm_resource_group.rg-non-prd.location}"
-  resource_group_name = "${data.azurerm_resource_group.rg-non-prd.name}"
+  location            = data.azurerm_resource_group.rg-non-prd.location
+  resource_group_name = data.azurerm_resource_group.rg-non-prd.name
 
   #os_type              = "linux"
   storage_account_type = "Premium_LRS"
   create_option        = "FromImage"
 
   #source_uri           = ""
-  image_reference_id = "${data.azurerm_platform_image.centos.id}"
+  image_reference_id = data.azurerm_platform_image.centos.id
   disk_size_gb       = "1000"
 }
 
 resource "azurerm_virtual_machine" "archivematica" {
   name                  = "${var.prefix}-archivematica"
-  location              = "${data.azurerm_resource_group.rg-non-prd.location}"
-  resource_group_name   = "${data.azurerm_resource_group.rg-non-prd.name}"
-  network_interface_ids = ["${azurerm_network_interface.archivematica-nic.id}"]
+  location              = data.azurerm_resource_group.rg-non-prd.location
+  resource_group_name   = data.azurerm_resource_group.rg-non-prd.name
+  network_interface_ids = [azurerm_network_interface.archivematica-nic.id]
   vm_size               = "Standard_D4s_v3"
 
   # Uncomment this line to delete the OS disk automatically when deleting the VM
@@ -229,7 +221,7 @@ resource "azurerm_virtual_machine" "archivematica" {
 
     # if this is provided, os_profile is not allowed
     os_type           = "linux"
-    managed_disk_id   = "${azurerm_managed_disk.archivematica-osdisk.id}"
+    managed_disk_id   = azurerm_managed_disk.archivematica-osdisk.id
     managed_disk_type = "Premium_LRS"
     caching           = "ReadWrite"
     create_option     = "Attach"
@@ -245,43 +237,42 @@ resource "azurerm_virtual_machine" "archivematica" {
 ### Storage creation
 resource "azurerm_storage_account" "thelma-poc-assets-storage-acct" {
   name                     = "thelmapocassets"
-  location                 = "${data.azurerm_resource_group.rg-non-prd.location}"
-  resource_group_name      = "${data.azurerm_resource_group.rg-non-prd.name}"
+  location                 = data.azurerm_resource_group.rg-non-prd.location
+  resource_group_name      = data.azurerm_resource_group.rg-non-prd.name
   account_tier             = "Standard"
   account_replication_type = "LRS"
 }
 
 resource "azurerm_storage_container" "thelma-poc-assets" {
   name                  = "thelmapocassets"
-  resource_group_name   = "${data.azurerm_resource_group.rg-non-prd.name}"
-  storage_account_name  = "${azurerm_storage_account.thelma-poc-assets.name}"
+  storage_account_name  = azurerm_storage_account.thelma-poc-assets-storage-acct.name
   container_access_type = "container"
 }
 
 resource "azurerm_storage_account" "thelma-poc-uploads-storage-acct" {
   name                     = "thelmapocuploads"
-  location                 = "${data.azurerm_resource_group.rg-non-prd.location}"
-  resource_group_name      = "${data.azurerm_resource_group.rg-non-prd.name}"
+  location                 = data.azurerm_resource_group.rg-non-prd.location
+  resource_group_name      = data.azurerm_resource_group.rg-non-prd.name
   account_tier             = "Standard"
   account_replication_type = "LRS"
 }
 
 resource "azurerm_storage_container" "thelma-poc-uploads" {
   name                  = "thelmapocuploads"
-  resource_group_name   = "${data.azurerm_resource_group.rg-non-prd.name}"
-  storage_account_name  = "${azurerm_storage_account.thelma-poc-uploads.name}"
+  storage_account_name  = azurerm_storage_account.thelma-poc-uploads-storage-acct.name
   container_access_type = "container"
 }
 
 ### Outputs
 output "storage_ip_address" {
-  value = "${azurerm_network_interface.storage-nic.private_ip_address}"
+  value = azurerm_network_interface.storage-nic.private_ip_address
 }
 
 output "hyku_ip_address" {
-  value = "${azurerm_network_interface.hyku-nic.private_ip_address}"
+  value = azurerm_network_interface.hyku-nic.private_ip_address
 }
 
 output "archivematica_ip_address" {
-  value = "${azurerm_network_interface.archivematica-nic.private_ip_address}"
+  value = azurerm_network_interface.archivematica-nic.private_ip_address
 }
+
