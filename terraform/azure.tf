@@ -177,7 +177,9 @@ resource "azurerm_virtual_machine" "hyku" {
   }
 
   tags = {
-    hyku = "hyku-1"
+    Agency  = "DORIS"
+    Project = "THELMA POC"
+    Purpose = "Hyku"
   }
 }
 
@@ -234,7 +236,9 @@ resource "azurerm_virtual_machine" "archivematica" {
   }
 
   tags = {
-    archivematica = "archivematica-1"
+    Agency  = "DORIS"
+    Project = "THELMA POC"
+    Purpose = "Archivematica"
   }
 }
 
