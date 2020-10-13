@@ -134,7 +134,7 @@ resource "azurerm_network_interface" "hyku-nic" {
   resource_group_name = data.azurerm_resource_group.rg-non-prd.name
 
   ip_configuration {
-    name                          = "thelma-poc-hyku-nic"
+    name                          = "testconfiguration1"
     subnet_id                     = data.azurerm_subnet.subnet-public-01.id
     private_ip_address_allocation = "Dynamic"
   }
