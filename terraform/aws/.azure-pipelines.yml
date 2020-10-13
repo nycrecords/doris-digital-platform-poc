@@ -29,7 +29,7 @@ variables:
   - name: tf_state_filename
     value: 'azure-doris-digital-platform-${{ parameters.Project }}-${{ parameters.custom_tfstate_name }}-${{ parameters.Environment }}.terraform.tfstate'
   - name: tf_directory
-    value: '$(System.DefaultWorkingDirectory)/terraform'
+    value: '$(System.DefaultWorkingDirectory)/terraform/aws'
   - name: download_tf_vars
     value: 'true'
 
