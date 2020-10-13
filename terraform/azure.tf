@@ -3,6 +3,15 @@ provider "azurerm" {
   features {}
 }
 
+terraform {
+  backend "azurerm" {
+    resource_group_name  = "rg-azu-e2-DORIS-prod"
+    storage_account_name = "dorisappdev"
+    container_name       = "terraform-state"
+    key                  = "azure-doris-digital-platform-test-default-dev.terraform.tfstate"
+  }
+}
+
 ### Network Resources 
 ### Managed by DOITT
 data "azurerm_resource_group" "rg-network" {
