@@ -120,11 +120,7 @@ resource "azurerm_virtual_machine" "storage" {
     create_option     = "Attach"
   }
 
-  tags = {
-    Agency  = "DORIS"
-    Project = "THELMA POC"
-    Purpose = "Storage"
-  }
+  tags = var.tags
 }
 
 ### Hyku App VM 
@@ -178,7 +174,7 @@ resource "azurerm_virtual_machine" "hyku" {
     create_option     = "Attach"
   }
 
-  tags = merge(var.tags, map("Name", "my resource"))
+  tags = var.tags
 }
 
 ### Archivematica VM
@@ -232,11 +228,7 @@ resource "azurerm_virtual_machine" "archivematica" {
     create_option     = "Attach"
   }
 
-  tags = {
-    Agency  = "DORIS"
-    Project = "THELMA POC"
-    Purpose = "Archivematica"
-  }
+  tags = var.tags
 }
 
 ### Storage creation
