@@ -1,15 +1,43 @@
-# Terraform release pipeline
+---
 variables:
-  - group: Digital Platform POC - Azure
-  - group: Digital Platform POC - General
+  - name: tf_azure_service_connection
+    value: 'SPN-AZDO-DORIS'
+  - name: 'pool'
+    value: 'AKS-Agent-Pool'
+  - name: 'terraform_version'
+    value: '0.13.4'
+  - name: 'tf_apply_command_options'
+    value: '-auto-approve -input=false'
+  - name: 'tf_fmt_command_options'
+    value: '-recursive -check'
+  - name: 'tf_init_command_options'
+    value: '-input=false'
+  - name: 'tf_plan_command_options'
+    value: '-lock=false -input=false'
+  - name: 'tf_validate_command_options'
+    value: ''
   - name: 'known_host'
     value: 'ssh.dev.azure.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7Hr1oTWqNqOlzGJOfGJ4NakVyIzf1rXYd4d7wo6jBlkLvCA4odBlL0mDUyZ0/QUfTTqeu+tm22gOsv+VrVTMk6vwRU75gY/y9ut5Mb3bR5BV58dKXyq9A9UeB5Cakehn5Zgm6x1mKoVyf+FFn26iYqXJRgzIZZcZ5V6hrE0Qg39kZm4az48o0AUbf6Sp4SLdvnuMa2sVNwHBboS7EJkm57XQPVU3/QpyNLHbWDdzwtrlS+ez30S3AdYhLKEOxAG8weOnyrtLJAUen9mTkol8oII1edf7mWWbWVf0nBmly21+nZcmCTISQBtdcyPaEno7fFQMDD26/s0lfKob4Kw8H'
+  - name: tf_storage_resource_group
+    value: 'rg-azu-e2-DORIS-prod'
+  - name: tf_storage_region
+    value: 'eastus2'
+  - name: tf_storage_account_name
+    value: 'dorisappdev'
+  - name: tf_storage_container_name
+    value: 'terraform-state'
   - name: tf_state_filename
-    value: 'azure-${{ parameters.Project }}-${{ parameters.Environment }}.terraform.tfstate'
+    value: 'azure-doris-digital-platform-${{ parameters.Project }}-${{ parameters.custom_tfstate_name }}-${{ parameters.Environment }}.terraform.tfstate'
   - name: tf_directory
-    value: '$(System.DefaultWorkingDirectory)/terraform/azure'
+    value: '$(System.DefaultWorkingDirectory)/terraform/aws'
+  - name: download_tf_vars
+    value: 'true'
 
 parameters:
+  - name: custom_tfstate_name
+    displayName: Custom terraform state name
+    type: string
+    default: default
   - name: Agency
     displayName: Agency Name
     type: string
@@ -20,7 +48,6 @@ parameters:
     default: dev
     values:
     - dev
-    - tst
     - stg
     - prd
   - name: Application
@@ -63,14 +90,7 @@ trigger:
       - "*"
   paths:
     include: 
-      - terraform/azure/*
-pr:
-  branches:
-    include:
-      - master
-  paths:
-    include:
-      - terraform/azure/*
+      - terraform/aws/*
 
 pool: $(pool)
 
@@ -105,5 +125,3 @@ stages:
 # - template: prisma-iac-scan.yaml@templates
 - template: terraform-preflight-check.yaml@templates
 - template: terraform-plan.yaml@templates
-- template: terraform-apply.yaml@templates
-- template: terraform-destroy.yaml@templates
