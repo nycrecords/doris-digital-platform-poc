@@ -39,6 +39,9 @@ variable "azurerm_subnet_private_02" {
   description = "Name for Azure Subnet - Private02 (DoITT Managed)"
 }
 
+variable "azurerm_key_vault" {
+  description = "Name for Azure Key Vault"
+}
 # ---------------------------------------------------------------------------------------------------------------------
 # OPTIONAL PARAMETERS
 # These parameters have reasonable defaults.

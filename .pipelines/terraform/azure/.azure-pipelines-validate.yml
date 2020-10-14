@@ -1,7 +1,8 @@
 # Terraform release pipeline
 variables:
-  - group: Digital Platform POC - Azure
   - group: Digital Platform POC - General
+  - group: Digital Platform POC - Tags
+  - group: Digital Platform POC - Azure
   - name: 'known_host'
     value: 'ssh.dev.azure.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7Hr1oTWqNqOlzGJOfGJ4NakVyIzf1rXYd4d7wo6jBlkLvCA4odBlL0mDUyZ0/QUfTTqeu+tm22gOsv+VrVTMk6vwRU75gY/y9ut5Mb3bR5BV58dKXyq9A9UeB5Cakehn5Zgm6x1mKoVyf+FFn26iYqXJRgzIZZcZ5V6hrE0Qg39kZm4az48o0AUbf6Sp4SLdvnuMa2sVNwHBboS7EJkm57XQPVU3/QpyNLHbWDdzwtrlS+ez30S3AdYhLKEOxAG8weOnyrtLJAUen9mTkol8oII1edf7mWWbWVf0nBmly21+nZcmCTISQBtdcyPaEno7fFQMDD26/s0lfKob4Kw8H'
   - name: tf_state_filename
@@ -13,11 +14,11 @@ parameters:
   - name: Agency
     displayName: Agency Name
     type: string
-    default: DORIS
+    default: ${{ variables.Agency }}
   - name: Environment
     displayName: Environment
     type: string
-    default: dev
+    default: ${{ variables.Environment }}
     values:
     - dev
     - tst
@@ -26,27 +27,23 @@ parameters:
   - name: Application
     displayName: Application description
     type: string
-    default: test
-  - name: ChangeTicketNumber
-    displayName: Change Ticket Number
-    type: string
-    default: INC000
+    default: ${{ variables.Application }}
   - name: Project
     displayName: Project Name
     type: string
-    default: test
+    default: ${{ variables.Project }}
   - name: UsedBy
     displayName: Used By
     type: string
-    default: DORIS App Dev
+    default: ${{ variables.UsedBy }}
   - name: SupportedBy
     displayName: Supported By
     type: string
-    default: DORIS App Dev
+    default: ${{ variables.SupportedBy }}
   - name: ManagedBy
     displayName: Managed By
     type: string
-    default: DORIS App Dev
+    default: ${{ variables.ManagedBy }}
 
 resources:
   repositories:
@@ -90,7 +87,6 @@ stages:
               Environment        = "${{ parameters.Environment }}"
               Application        = "${{ parameters.Application }}"
               CreatedBy          = "Terraform"
-              RemedyTicketNumber = "${{ parameters.ChangeTicketNumber }}"
               Project            = "${{ parameters.Project }}"
               UsedBy             = "${{ parameters.UsedBy }}"
               SupportedBy        = "${{ parameters.SupportedBy }}"
