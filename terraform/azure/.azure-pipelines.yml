@@ -106,4 +106,5 @@ stages:
 - template: terraform-preflight-check.yaml@templates
 - template: terraform-plan.yaml@templates
 - template: terraform-apply.yaml@templates
+- template: terraform-destroy-dryrun.yaml@templates
 - template: terraform-destroy.yaml@templates
