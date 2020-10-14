@@ -26,15 +26,11 @@ parameters:
   - name: Application
     displayName: Application description
     type: string
-    default: test
-  - name: ChangeTicketNumber
-    displayName: Change Ticket Number
-    type: string
-    default: INC000
+    default: THELMA POC
   - name: Project
     displayName: Project Name
     type: string
-    default: test
+    default: THELMA
   - name: UsedBy
     displayName: Used By
     type: string
@@ -60,16 +56,9 @@ trigger:
   batch: true
   branches:
     include:
-      - "*"
-  paths:
-    include: 
-      - terraform/azure/*
-pr:
-  branches:
-    include:
       - master
   paths:
-    include:
+    include: 
       - terraform/azure/*
 
 pool: $(pool)
@@ -90,7 +79,6 @@ stages:
               Environment        = "${{ parameters.Environment }}"
               Application        = "${{ parameters.Application }}"
               CreatedBy          = "Terraform"
-              RemedyTicketNumber = "${{ parameters.ChangeTicketNumber }}"
               Project            = "${{ parameters.Project }}"
               UsedBy             = "${{ parameters.UsedBy }}"
               SupportedBy        = "${{ parameters.SupportedBy }}"
@@ -102,9 +90,6 @@ stages:
         inputs:
           targetPath: $(tf_directory)/terraform.tfvars
           artifactName: terraform_parameter_vars
-# - template: prisma-iac-scan.yaml@templates
 - template: terraform-preflight-check.yaml@templates
 - template: terraform-plan.yaml@templates
 - template: terraform-apply.yaml@templates
-- template: terraform-destroy-dryrun.yaml@templates
-- template: terraform-destroy.yaml@templates

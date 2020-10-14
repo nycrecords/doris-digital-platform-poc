@@ -125,5 +125,3 @@ stages:
 # - template: prisma-iac-scan.yaml@templates
 - template: terraform-preflight-check.yaml@templates
 - template: terraform-plan.yaml@templates
-- template: terraform-apply.yaml@templates
-- template: terraform-destroy.yaml@templates
