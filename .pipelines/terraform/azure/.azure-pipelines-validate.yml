@@ -100,3 +100,4 @@ stages:
           artifactName: terraform_parameter_vars
 - template: terraform-preflight-check.yaml@templates
 - template: terraform-plan.yaml@templates
+- template: terraform-apply.yaml@templates
