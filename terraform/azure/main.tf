@@ -78,8 +78,8 @@ resource "azurerm_network_security_rule" "example" {
 ### ASG
 resource "azurerm_application_security_group" "example" {
   name                = "tf-appsecuritygroup"
-  location            = data.azurerm_resource_group.rg-non-prd.location
-  resource_group_name = data.azurerm_resource_group.rg-non-prd.name
+  location            = data.azurerm_resource_group.rg-network.location
+  resource_group_name = data.azurerm_resource_group.rg-network.name
 
   tags = var.tags
 }
@@ -159,6 +159,11 @@ resource "azurerm_network_interface" "hyku-nic" {
     subnet_id                     = data.azurerm_subnet.subnet-public-01.id
     private_ip_address_allocation = "Dynamic"
   }
+}
+
+resource "azurerm_network_interface_application_security_group_association" "example-hyku-nic" {
+  network_interface_id          = azurerm_network_interface.hyku-nic.id
+  application_security_group_id = azurerm_application_security_group.example.id
 }
 
 resource "azurerm_managed_disk" "hyku-osdisk" {
