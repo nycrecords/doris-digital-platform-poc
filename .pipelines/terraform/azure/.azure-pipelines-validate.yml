@@ -14,11 +14,11 @@ parameters:
   - name: Agency
     displayName: Agency Name
     type: string
-    default: ${{ variables.Agency }}
+    default: DORIS
   - name: Environment
     displayName: Environment
     type: string
-    default: ${{ variables.Environment }}
+    default: dev
     values:
     - dev
     - tst
@@ -27,23 +27,23 @@ parameters:
   - name: Application
     displayName: Application description
     type: string
-    default: ${{ variables.Application }}
+    default: test
   - name: Project
     displayName: Project Name
     type: string
-    default: ${{ variables.Project }}
+    default: thelma
   - name: UsedBy
     displayName: Used By
     type: string
-    default: ${{ variables.UsedBy }}
+    default: DORIS App Dev
   - name: SupportedBy
     displayName: Supported By
     type: string
-    default: ${{ variables.SupportedBy }}
+    default: DORIS App Dev
   - name: ManagedBy
     displayName: Managed By
     type: string
-    default: ${{ variables.ManagedBy }}
+    default: DORIS App Dev
 
 resources:
   repositories:
