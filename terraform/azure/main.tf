@@ -60,6 +60,15 @@ data "azurerm_network_security_group" "nsg" {
   resource_group_name = data.azurerm_resource_group.rg-network.name
 }
 
+### ASG
+resource "azurerm_application_security_group" "example" {
+  name                = "tf-appsecuritygroup"
+  location            = data.azurerm_resource_group.rg-non-prd.location
+  resource_group_name = data.azurerm_resource_group.rg-non-prd.name
+
+  tags = var.tags
+}
+
 ### VM Images
 data "azurerm_platform_image" "centos" {
   location  = data.azurerm_resource_group.rg-network.location
@@ -69,45 +78,6 @@ data "azurerm_platform_image" "centos" {
   # version   = "latest"
 }
 
-# ### Key Vault
-# resource "azurerm_key_vault" "thelma-poc-key-vault" {
-#   name                        = "testvault"
-#   location                    = azurerm_resource_group.example.location
-#   resource_group_name         = data.azurerm_resource_group.rg-non-prd.name
-#   enabled_for_disk_encryption = true
-#   tenant_id                   = data.azurerm_client_config.current.tenant_id
-#   soft_delete_enabled         = true
-#   soft_delete_retention_days  = 7
-#   purge_protection_enabled    = false
-
-#   sku_name = "standard"
-
-#   access_policy {
-#     tenant_id = data.azurerm_client_config.current.tenant_id
-#     object_id = data.azurerm_client_config.current.object_id
-
-#     key_permissions = [
-#       "get",
-#     ]
-
-#     secret_permissions = [
-#       "get",
-#     ]
-
-#     storage_permissions = [
-#       "get",
-#     ]
-#   }
-
-#   network_acls {
-#     default_action = "Deny"
-#     bypass         = "AzureServices"
-#   }
-
-#   tags = {
-#     environment = "Testing"
-#   }
-# }
 
 ### Storage VM
 resource "azurerm_network_interface" "storage-nic" {
