@@ -84,6 +84,11 @@ resource "azurerm_application_security_group" "example" {
   tags = var.tags
 }
 
+data "azurerm_application_security_group" "arnold" {
+  name                = "testappsg"
+  resource_group_name = data.azurerm_resource_group.rg-network.name
+}
+
 ### VM Images
 data "azurerm_platform_image" "centos" {
   location  = data.azurerm_resource_group.rg-network.location
@@ -163,7 +168,7 @@ resource "azurerm_network_interface" "hyku-nic" {
 
 resource "azurerm_network_interface_application_security_group_association" "example-hyku-nic" {
   network_interface_id          = azurerm_network_interface.hyku-nic.id
-  application_security_group_id = azurerm_application_security_group.example.id
+  application_security_group_id = data.azurerm_application_security_group.arnold.id
 }
 
 resource "azurerm_managed_disk" "hyku-osdisk" {
